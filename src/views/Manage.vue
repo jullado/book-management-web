@@ -65,6 +65,14 @@
           </v-card-text>
         </v-card>
       </v-col>
+      <v-col
+        v-if="books.length === 0"
+        cols="12"
+        class="book-zero"
+      >
+        <v-img src="images/no-results.png" contain height="120" />
+        <p>ไม่พบหนังสือ</p>
+      </v-col>
     </v-row>
 
     <!-- Pagination -->
@@ -160,6 +168,7 @@ import Swal from "sweetalert2";
 import Cookies from "js-cookie";
 import { useRouter } from "vue-router";
 import { useDateFormat } from "../utils/date";
+import type { BookModel } from "../types/book";
 
 // Declare store
 const router = useRouter();
@@ -212,6 +221,7 @@ const dialog = ref(false);
 const isEditMode = ref(false);
 const formRef = ref();
 const form = ref({
+  id: "",
   title: "",
   author: "",
   published_year: new Date().getFullYear(),
@@ -239,7 +249,7 @@ const init = async () => {
 
     books.value = response.data.data;
     total.value = response.data.pagination.total;
-  } catch (err) {
+  } catch (err: any) {
     Swal.fire({
       icon: "error",
       title: "Error",
@@ -263,6 +273,7 @@ const updatePerPage = (limit: number) => {
 
 const openAddBookDialog = () => {
   form.value = {
+    id: "",
     title: "",
     author: "",
     published_year: new Date().getFullYear(),
@@ -279,19 +290,18 @@ const submitForm = async () => {
 
   try {
     useLoading.startLoading();
-    let response;
 
     if (isEditMode.value) {
-      response = await useBook.updateBook(form.value);
+      await useBook.updateBook(form.value);
       Swal.fire("แก้ไขหนังสือสำเร็จ", "", "success");
     } else {
-      response = await useBook.addBook(form.value);
+      await useBook.addBook(form.value);
       Swal.fire("เพิ่มหนังสือสำเร็จ", "", "success");
     }
 
     dialog.value = false;
     init();
-  } catch (err) {
+  } catch (err: any) {
     Swal.fire({
       icon: "error",
       title: "Error",
@@ -322,7 +332,7 @@ const deleteBook = async (book: BookModel) => {
   if (confirm.isConfirmed) {
     try {
       useLoading.startLoading();
-      const response = await useBook.deleteBook(book.id);
+      await useBook.deleteBook(book.id);
       Swal.fire("ลบสำเร็จ", `"${book.title}" ถูกลบเรียบร้อย`, "success");
       init();
     } catch (err: any) {
@@ -441,5 +451,15 @@ h2 {
 }
 .perpage :deep(.v-field__input) {
   font-size: 12px;
+}
+
+.book-zero {
+  display: flex;
+  flex-direction: column;
+  height: 20rem;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 400;
+  opacity: 0.75;
 }
 </style>

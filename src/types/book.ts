@@ -2,10 +2,7 @@ export type ResponseModel<T> = {
   status: boolean;
   code: number;
   message: string;
-  data: {
-    pagination: Pagination;
-    data: T;
-  };
+  data: T;
 };
 
 export type BookModel = {
